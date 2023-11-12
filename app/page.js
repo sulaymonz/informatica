@@ -3,7 +3,7 @@ export default function Home() {
     <main>
       <div className="container mx-auto px-4">
         <h1 className="my-5 text-3xl text-primary text-center">
-          Школьная информатика для начальныс классов
+          Школьная информатика для начальных классов
         </h1>
         <p className="my-3">
           Повседневная практика показывает, что реализация намеченных плановых
