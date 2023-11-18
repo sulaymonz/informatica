@@ -10,7 +10,8 @@ const ColorPanel = ({ colors, activeColor, onChange, className = '' }) => {
         {colors.map((color) => (
           <div
             key={color.name}
-            className={`flex justify-center items-center h-[30px] w-[30px] rounded-lg shadow hover:shadow-lg cursor-pointer ${
+            title={color.name}
+            className={`h-[30px] w-[30px] rounded-lg shadow hover:shadow-lg cursor-pointer ${
               color.name === activeColor.name
                 ? 'shadow-lg shadow-secondary'
                 : ''

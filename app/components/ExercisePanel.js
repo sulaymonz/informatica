@@ -4,10 +4,11 @@ import { useState } from 'react';
 import Canvas from './Canvas';
 import ToolsPanel from '../components/ToolsPanel';
 import ColorPanel from '../components/ColorPanel';
+import CurrentColorPanel from './CurrentColorPanel';
 
 const colors = [
   {
-    name: 'red',
+    name: 'Красный',
     cssRgbaValue: 'rgba(255, 0, 0, 255)',
     r: 255,
     g: 0,
@@ -15,7 +16,7 @@ const colors = [
     a: 255,
   },
   {
-    name: 'orange',
+    name: 'Оранжевый',
     cssRgbaValue: 'rgba(255, 128, 0, 255)',
     r: 255,
     g: 128,
@@ -23,7 +24,7 @@ const colors = [
     a: 255,
   },
   {
-    name: 'yellow',
+    name: 'Жёлтый',
     cssRgbaValue: 'rgba(255, 255, 0, 255)',
     r: 255,
     g: 255,
@@ -31,7 +32,7 @@ const colors = [
     a: 255,
   },
   {
-    name: 'green',
+    name: 'Зелёный',
     cssRgbaValue: 'rgba(0, 255, 0, 255)',
     r: 0,
     g: 255,
@@ -39,7 +40,7 @@ const colors = [
     a: 255,
   },
   {
-    name: 'aqua',
+    name: 'Голубой',
     cssRgbaValue: 'rgba(0, 255, 255, 255)',
     r: 0,
     g: 255,
@@ -47,7 +48,7 @@ const colors = [
     a: 255,
   },
   {
-    name: 'blue',
+    name: 'Синий',
     cssRgbaValue: 'rgba(0, 0, 255, 255)',
     r: 0,
     g: 0,
@@ -55,7 +56,7 @@ const colors = [
     a: 255,
   },
   {
-    name: 'pink',
+    name: 'Розовый',
     cssRgbaValue: 'rgba(255, 0, 255, 255)',
     r: 255,
     g: 0,
@@ -63,7 +64,7 @@ const colors = [
     a: 255,
   },
   {
-    name: 'black',
+    name: 'Чёрный',
     cssRgbaValue: 'rgba(0, 0, 0, 255)',
     r: 0,
     g: 0,
@@ -73,7 +74,7 @@ const colors = [
 ];
 
 const ExercisePanel = () => {
-  const [activeColor, setActiveColor] = useState('pink');
+  const [activeColor, setActiveColor] = useState(colors[0]);
   const [activeTool, setActiveTool] = useState('pencil');
 
   return (
@@ -88,12 +89,14 @@ const ExercisePanel = () => {
           }}
         />
         <ColorPanel
+          className="mb-4"
           colors={colors}
           activeColor={activeColor}
           onChange={(color) => {
             setActiveColor(color);
           }}
         />
+        <CurrentColorPanel activeColor={activeColor} />
       </div>
       <div className="col-span-10 rounded-lg shadow-xl min-h-[300px] p-5">
         <Canvas brushColor={activeColor} />
