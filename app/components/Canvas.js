@@ -6,17 +6,17 @@ const Canvas = () => {
   const canvasRef = useRef();
   const ctxRef = useRef();
   const [brushColor, setBrushColor] = useState({
-    color: 'rgba(0, 0, 255, 255)',
-    r: 0,
-    g: 0,
-    b: 255,
+    color: 'rgba(255, 255, 0, 255)',
+    r: 255,
+    g: 255,
+    b: 0,
     a: 255,
   });
 
   const onClick = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();
-    const mouseX = e.pageX - rect.x;
-    const mouseY = e.pageY - rect.y;
+    const mouseX = Math.floor(e.pageX - rect.x);
+    const mouseY = Math.floor(e.pageY - rect.y);
     actionFill(mouseX, mouseY, brushColor);
   };
 

@@ -1,4 +1,4 @@
-import Canvas from './Canvas';
+import ExercisePanel from '../components/ExercisePanel';
 
 export default function Exercise() {
   return (
@@ -16,7 +16,7 @@ export default function Exercise() {
           позиций, занимаемых участниками в отношении поставленных задач.
         </p>
         <br />
-        <Canvas />
+        <ExercisePanel />
       </div>
     </main>
   );
