@@ -1,17 +1,10 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 
-const Canvas = () => {
+const Canvas = ({ brushColor }) => {
   const canvasRef = useRef();
   const ctxRef = useRef();
-  const [brushColor, setBrushColor] = useState({
-    color: 'rgba(255, 255, 0, 255)',
-    r: 255,
-    g: 255,
-    b: 0,
-    a: 255,
-  });
 
   const onClick = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();

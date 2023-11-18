@@ -9,12 +9,15 @@ const ColorPanel = ({ colors, activeColor, onChange, className = '' }) => {
       <div className="grid grid-cols-2 gap-4 p-4">
         {colors.map((color) => (
           <div
+            key={color.name}
             className={`flex justify-center items-center h-[30px] w-[30px] rounded-lg shadow hover:shadow-lg cursor-pointer ${
-              color === activeColor ? 'shadow-lg shadow-secondary' : ''
+              color.name === activeColor.name
+                ? 'shadow-lg shadow-secondary'
+                : ''
             }`}
             role="button"
             tabIndex="0"
-            style={{ backgroundColor: color }}
+            style={{ backgroundColor: color.cssRgbaValue }}
             onClick={() => {
               onChange(color);
             }}

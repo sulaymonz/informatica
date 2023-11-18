@@ -23,6 +23,7 @@ const ToolsPanel = ({ tools, activeTool, onChange, className = '' }) => {
           const Icon = icons[tool];
           return (
             <div
+              key={tool}
               className={`flex justify-center items-center h-[30px] w-[30px] rounded-lg shadow hover:shadow-lg cursor-pointer ${
                 tool === activeTool ? 'shadow-lg shadow-secondary' : ''
               }`}
