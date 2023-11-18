@@ -1,4 +1,5 @@
 import ExercisePanel from '../components/ExercisePanel';
+import { defaultColors } from '../constants/colors';
 
 export default function Exercise() {
   return (
@@ -16,7 +17,7 @@ export default function Exercise() {
           позиций, занимаемых участниками в отношении поставленных задач.
         </p>
         <br />
-        <ExercisePanel />
+        <ExercisePanel colors={defaultColors} />
       </div>
     </main>
   );

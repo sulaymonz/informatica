@@ -6,74 +6,7 @@ import ToolsPanel from '../components/ToolsPanel';
 import ColorPanel from '../components/ColorPanel';
 import CurrentColorPanel from './CurrentColorPanel';
 
-const colors = [
-  {
-    name: 'Красный',
-    cssRgbaValue: 'rgba(255, 0, 0, 255)',
-    r: 255,
-    g: 0,
-    b: 0,
-    a: 255,
-  },
-  {
-    name: 'Оранжевый',
-    cssRgbaValue: 'rgba(255, 128, 0, 255)',
-    r: 255,
-    g: 128,
-    b: 0,
-    a: 255,
-  },
-  {
-    name: 'Жёлтый',
-    cssRgbaValue: 'rgba(255, 255, 0, 255)',
-    r: 255,
-    g: 255,
-    b: 0,
-    a: 255,
-  },
-  {
-    name: 'Зелёный',
-    cssRgbaValue: 'rgba(0, 255, 0, 255)',
-    r: 0,
-    g: 255,
-    b: 0,
-    a: 255,
-  },
-  {
-    name: 'Голубой',
-    cssRgbaValue: 'rgba(0, 255, 255, 255)',
-    r: 0,
-    g: 255,
-    b: 255,
-    a: 255,
-  },
-  {
-    name: 'Синий',
-    cssRgbaValue: 'rgba(0, 0, 255, 255)',
-    r: 0,
-    g: 0,
-    b: 255,
-    a: 255,
-  },
-  {
-    name: 'Розовый',
-    cssRgbaValue: 'rgba(255, 0, 255, 255)',
-    r: 255,
-    g: 0,
-    b: 255,
-    a: 255,
-  },
-  {
-    name: 'Чёрный',
-    cssRgbaValue: 'rgba(0, 0, 0, 255)',
-    r: 0,
-    g: 0,
-    b: 0,
-    a: 255,
-  },
-];
-
-const ExercisePanel = () => {
+const ExercisePanel = ({ colors }) => {
   const [activeColor, setActiveColor] = useState(colors[0]);
   const [activeTool, setActiveTool] = useState('pencil');
 
