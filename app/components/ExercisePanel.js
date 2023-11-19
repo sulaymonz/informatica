@@ -11,8 +11,8 @@ const ExercisePanel = ({ colors }) => {
   const [activeTool, setActiveTool] = useState('pencil');
 
   return (
-    <div className="grid grid-cols-12 gap-4 m-10">
-      <div className="col-span-2 min-h-[300px] p-5">
+    <div className="w-full flex flex-row justify-center gap-4">
+      <div>
         <ToolsPanel
           className="mb-4"
           tools={['pencil', 'color-bucket', 'grab', 'refresh']}
@@ -31,7 +31,7 @@ const ExercisePanel = ({ colors }) => {
         />
         <CurrentColorPanel activeColor={activeColor} />
       </div>
-      <div className="col-span-10 rounded-lg shadow-xl min-h-[300px] p-5">
+      <div>
         <Canvas brushColor={activeColor} />
       </div>
     </div>

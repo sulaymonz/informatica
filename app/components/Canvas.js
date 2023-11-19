@@ -125,7 +125,13 @@ const Canvas = ({ brushColor }) => {
   }, []);
 
   return (
-    <canvas ref={canvasRef} width="450" height="450" onClick={onClick}></canvas>
+    <canvas
+      className="cursor-crosshair"
+      ref={canvasRef}
+      width="450"
+      height="450"
+      onClick={onClick}
+    ></canvas>
   );
 };
 
