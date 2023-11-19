@@ -18,5 +18,29 @@ module.exports = {
       serif: ['"PT Serif"', 'serif'],
     },
   },
-  plugins: [],
+  plugins: [
+    function ({ addComponents }) {
+      addComponents({
+        '.container': {
+          maxWidth: '100%',
+          paddingLeft: '1rem',
+          paddingRight: '1rem',
+          '@screen sm': {
+            maxWidth: '640px',
+          },
+          '@screen md': {
+            maxWidth: '768px',
+          },
+          '@screen lg': {
+            maxWidth: '1280px',
+            paddingLeft: '4rem',
+            paddingRight: '4rem',
+          },
+          '@screen xl': {
+            maxWidth: '1400px',
+          },
+        },
+      });
+    },
+  ],
 };

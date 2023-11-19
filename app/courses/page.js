@@ -3,7 +3,7 @@ import Link from 'next/link';
 export default function Courses() {
   return (
     <main>
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto">
         <h1 className="my-5 text-3xl text-primary text-center">Курсы</h1>
         <p className="my-3">
           Однозначно, тщательные исследования конкурентов могут быть призваны к

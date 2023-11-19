@@ -1,7 +1,7 @@
 export default function About() {
   return (
     <main>
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto">
         <h1 className="my-5 text-3xl text-primary text-center">О нас</h1>
         <p className="my-3">
           Таким образом, глубокий уровень погружения предопределяет высокую

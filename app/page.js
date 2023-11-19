@@ -1,7 +1,7 @@
 export default function Home() {
   return (
     <main>
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto">
         <h1 className="my-5 text-3xl text-primary text-center">
           Школьная информатика для начальных классов
         </h1>

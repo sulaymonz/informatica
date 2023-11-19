@@ -4,7 +4,7 @@ import { defaultColors } from '../constants/colors';
 export default function Exercise() {
   return (
     <main>
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto">
         <h1 className="my-5 text-3xl text-primary text-center">Задача</h1>
         <p className="my-3">
           Банальные, но неопровержимые выводы, а также элементы политического
