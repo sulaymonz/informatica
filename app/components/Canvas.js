@@ -1,33 +1,52 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
-const Canvas = ({ brushColor }) => {
-  const canvasRef = useRef();
-  const ctxRef = useRef();
+const Canvas = ({ brushColor, images }) => {
+  const onScreenCvsRef = useRef();
+  const onScreenCtxRef = useRef();
+  const offScreenCvsRef = useRef();
+  const offScreenCtxRef = useRef();
+  const [curLoadedResNum, setCurLoadedResNum] = useState(0);
+  const [mapImg, setMapImg] = useState(null);
+  const [outlineImg, setOutlineImg] = useState(null);
+  const totalResToLoad = images.length;
 
   const onClick = (e) => {
-    const rect = canvasRef.current.getBoundingClientRect();
+    /* if (curLoadedResNum < totalResToLoad) {
+      return;
+    } */
+    const rect = onScreenCvsRef.current.getBoundingClientRect();
     const mouseX = Math.floor(e.pageX - rect.x);
     const mouseY = Math.floor(e.pageY - rect.y);
     actionFill(mouseX, mouseY, brushColor);
   };
 
+  const resourceLoaded = () => {
+    setCurLoadedResNum(curLoadedResNum + 1);
+  };
+
   const actionFill = (startX, startY, currentColor) => {
     // get imageData
-    let colorLayer = ctxRef.current.getImageData(
+    let colorLayer = offScreenCtxRef.current.getImageData(
       0,
       0,
-      canvasRef.current.width,
-      canvasRef.current.height,
+      offScreenCvsRef.current.width,
+      offScreenCvsRef.current.height,
     );
 
-    let startPos = (startY * canvasRef.current.width + startX) * 4;
+    let startPos = (startY * offScreenCvsRef.current.width + startX) * 4;
 
     // clicked color
     let startR = colorLayer.data[startPos];
     let startG = colorLayer.data[startPos + 1];
     let startB = colorLayer.data[startPos + 2];
+    let startA = colorLayer.data[startPos + 3];
+
+    // exit if transparent
+    if (startA < 255) {
+      return;
+    }
 
     // exit if color is the same
     if (
@@ -62,20 +81,20 @@ const Canvas = ({ brushColor }) => {
       y = newPos[1];
 
       // get current pixel position
-      pixelPos = (y * canvasRef.current.width + x) * 4;
+      pixelPos = (y * offScreenCvsRef.current.width + x) * 4;
       // Go up as long as the color matches and are inside the canvas
       while (y >= 0 && matchStartColor(pixelPos)) {
         y--;
-        pixelPos -= canvasRef.current.width * 4;
+        pixelPos -= offScreenCvsRef.current.width * 4;
       }
       //Don't overextend
-      pixelPos += canvasRef.current.width * 4;
+      pixelPos += offScreenCvsRef.current.width * 4;
       y++;
       reachLeft = false;
       reachRight = false;
 
       // Go down as long as the color matches and in inside the canvas
-      while (y < canvasRef.current.height && matchStartColor(pixelPos)) {
+      while (y < offScreenCvsRef.current.height && matchStartColor(pixelPos)) {
         colorPixel(pixelPos);
         if (x > 0) {
           if (matchStartColor(pixelPos - 4)) {
@@ -88,7 +107,7 @@ const Canvas = ({ brushColor }) => {
             reachLeft = false;
           }
         }
-        if (x < canvasRef.current.width - 1) {
+        if (x < offScreenCvsRef.current.width - 1) {
           if (matchStartColor(pixelPos + 4)) {
             if (!reachRight) {
               //Add pixel to stack
@@ -100,7 +119,7 @@ const Canvas = ({ brushColor }) => {
           }
         }
         y++;
-        pixelPos += canvasRef.current.width * 4;
+        pixelPos += offScreenCvsRef.current.width * 4;
       }
 
       // recursive until no more pixels to change
@@ -112,24 +131,42 @@ const Canvas = ({ brushColor }) => {
     floodFill();
 
     // render floodFill result
-    ctxRef.current.putImageData(colorLayer, 0, 0);
+    offScreenCtxRef.current.putImageData(colorLayer, 0, 0);
+    onScreenCtxRef.current.drawImage(offScreenCvsRef.current, 0, 0, 870, 500);
+    onScreenCtxRef.current.drawImage(outlineImg, 0, 0, 870, 500);
   };
 
   useEffect(() => {
-    ctxRef.current = canvasRef.current.getContext('2d');
-    const img = new Image();
-    img.src = '/images/coloring.jpg';
-    img.onload = () => {
-      ctxRef.current.drawImage(img, 0, 0, 450, 450);
+    // outline on onscreen canvas
+    onScreenCtxRef.current = onScreenCvsRef.current.getContext('2d');
+    const img1 = new Image();
+    img1.src = images.find((i) => i.type === 'outline').src;
+    img1.onload = () => {
+      resourceLoaded();
+      setOutlineImg(img1);
+      onScreenCtxRef.current.drawImage(img1, 0, 0, 870, 500);
+    };
+
+    // fill availability area map on off screen canvas
+    offScreenCvsRef.current = document.createElement('canvas');
+    offScreenCvsRef.current.width = 870;
+    offScreenCvsRef.current.height = 500;
+    offScreenCtxRef.current = offScreenCvsRef.current.getContext('2d');
+    const img2 = new Image();
+    img2.src = images.find((i) => i.type === 'map').src;
+    img2.onload = () => {
+      resourceLoaded();
+      setMapImg(img2);
+      offScreenCtxRef.current.drawImage(img2, 0, 0, 870, 500);
     };
   }, []);
 
   return (
     <canvas
       className="cursor-crosshair"
-      ref={canvasRef}
-      width="450"
-      height="450"
+      ref={onScreenCvsRef}
+      width="870"
+      height="500"
       onClick={onClick}
     ></canvas>
   );

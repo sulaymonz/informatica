@@ -1,5 +1,5 @@
-import ExercisePanel from '../components/ExercisePanel';
 import { defaultColors } from '../constants/colors';
+import ExercisePanel from '../components/ExercisePanel';
 
 export default function Exercise() {
   return (

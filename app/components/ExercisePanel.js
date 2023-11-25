@@ -11,7 +11,7 @@ const ExercisePanel = ({ colors }) => {
   const [activeTool, setActiveTool] = useState('pencil');
 
   return (
-    <div className="w-full flex flex-row justify-center gap-4">
+    <div className="w-full flex flex-row justify-center items-center gap-4">
       <div>
         <ToolsPanel
           className="mb-4"
@@ -32,7 +32,22 @@ const ExercisePanel = ({ colors }) => {
         <CurrentColorPanel activeColor={activeColor} />
       </div>
       <div>
-        <Canvas brushColor={activeColor} />
+        <div className="rounded-lg shadow-xl overflow-hidden">
+          <Canvas
+            brushColor={activeColor}
+            bgColor="#f2cfd2"
+            images={[
+              {
+                type: 'map',
+                src: '/images/exercises/grade1/grade1_exercise1-map.png',
+              },
+              {
+                type: 'outline',
+                src: '/images/exercises/grade1/grade1_exercise1-outline.png',
+              },
+            ]}
+          />
+        </div>
       </div>
     </div>
   );
