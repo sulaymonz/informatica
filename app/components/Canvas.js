@@ -44,7 +44,7 @@ const Canvas = ({ brushColor, images }) => {
     let startA = colorLayer.data[startPos + 3];
 
     // exit if transparent
-    if (startA < 255) {
+    if (startA === 0) {
       return;
     }
 
@@ -66,7 +66,8 @@ const Canvas = ({ brushColor, images }) => {
       let r = colorLayer.data[pixelPos];
       let g = colorLayer.data[pixelPos + 1];
       let b = colorLayer.data[pixelPos + 2];
-      return r === startR && g === startG && b === startB;
+      let a = colorLayer.data[pixelPos + 3];
+      return r === startR && g === startG && b === startB && a > 0;
     };
     const colorPixel = (pixelPos) => {
       colorLayer.data[pixelPos] = currentColor.r;
