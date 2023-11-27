@@ -1,18 +1,24 @@
 'use client';
 
+import { useSelector, useDispatch } from 'react-redux';
+import * as exerciseActions from '../../store/actions/exerciseActions';
 import CreateIcon from '@mui/icons-material/Create';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import PanToolIcon from '@mui/icons-material/PanTool';
 import FormatColorFillIcon from '@mui/icons-material/FormatColorFill';
+import UndoIcon from '@mui/icons-material/Undo';
+import RedoIcon from '@mui/icons-material/Redo';
 
 const icons = {
   pencil: CreateIcon,
-  'color-bucket': FormatColorFillIcon,
+  fill: FormatColorFillIcon,
   grab: PanToolIcon,
-  refresh: RefreshIcon,
+  undo: UndoIcon,
+  redo: RedoIcon,
 };
 
-const ToolsPanel = ({ tools, activeTool, onChange, className = '' }) => {
+const ToolsPanel = ({ tools, className = '' }) => {
+  const { activeTool } = useSelector((state) => state.exercise);
+  const dispatch = useDispatch();
   return (
     <div className={`w-28 rounded-lg shadow-xl overflow-hidden ${className}`}>
       <div className="h-8 leading-8 bg-primary text-white text-center">
@@ -30,7 +36,7 @@ const ToolsPanel = ({ tools, activeTool, onChange, className = '' }) => {
               role="button"
               tabIndex="0"
               onClick={() => {
-                onChange(tool);
+                dispatch(exerciseActions.toolSelected(tool));
               }}
             >
               <Icon />

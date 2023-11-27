@@ -1,6 +1,9 @@
 'use client';
 
-const CurrentColorPanel = ({ activeColor, className = '' }) => {
+import { useSelector } from 'react-redux';
+
+const CurrentColorPanel = ({ className = '' }) => {
+  const { activeColor } = useSelector((state) => state.exercise);
   return (
     <div className={`w-28 rounded-lg shadow-xl overflow-hidden ${className}`}>
       <div className="h-8 leading-8 bg-primary text-white text-center">

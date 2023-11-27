@@ -1,40 +1,22 @@
-'use client';
-
-import { useState } from 'react';
 import Canvas from './Canvas';
 import ToolsPanel from '../components/ToolsPanel';
 import ColorPanel from '../components/ColorPanel';
 import CurrentColorPanel from './CurrentColorPanel';
 
 const ExercisePanel = ({ colors }) => {
-  const [activeColor, setActiveColor] = useState(colors[0]);
-  const [activeTool, setActiveTool] = useState('pencil');
-
   return (
     <div className="w-full flex flex-row justify-center items-center gap-4">
       <div>
         <ToolsPanel
           className="mb-4"
-          tools={['pencil', 'color-bucket', 'grab', 'refresh']}
-          activeTool={activeTool}
-          onChange={(tool) => {
-            setActiveTool(tool);
-          }}
+          tools={['undo', 'redo', 'pencil', 'fill', 'grab']}
         />
-        <ColorPanel
-          className="mb-4"
-          colors={colors}
-          activeColor={activeColor}
-          onChange={(color) => {
-            setActiveColor(color);
-          }}
-        />
-        <CurrentColorPanel activeColor={activeColor} />
+        <ColorPanel className="mb-4" colors={colors} />
+        <CurrentColorPanel />
       </div>
       <div>
         <div className="rounded-lg shadow-xl overflow-hidden">
           <Canvas
-            brushColor={activeColor}
             bgColor="#f2cfd2"
             images={[
               {

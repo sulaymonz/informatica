@@ -1,8 +1,9 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 
-const Canvas = ({ brushColor, images }) => {
+const Canvas = ({ images }) => {
   const onScreenCvsRef = useRef();
   const onScreenCtxRef = useRef();
   const offScreenCvsRef = useRef();
@@ -10,6 +11,9 @@ const Canvas = ({ brushColor, images }) => {
   const [curLoadedResNum, setCurLoadedResNum] = useState(0);
   const [mapImg, setMapImg] = useState(null);
   const [outlineImg, setOutlineImg] = useState(null);
+  const { activeColor: brushColor, activeTool } = useSelector(
+    (state) => state.exercise,
+  );
   const totalResToLoad = images.length;
 
   const onClick = (e) => {

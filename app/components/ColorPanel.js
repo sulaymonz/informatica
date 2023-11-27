@@ -1,6 +1,11 @@
 'use client';
 
-const ColorPanel = ({ colors, activeColor, onChange, className = '' }) => {
+import { useSelector, useDispatch } from 'react-redux';
+import * as exerciseActions from '../../store/actions/exerciseActions';
+
+const ColorPanel = ({ colors, className = '' }) => {
+  const { activeColor } = useSelector((state) => state.exercise);
+  const dispatch = useDispatch();
   return (
     <div className={`w-28 rounded-lg shadow-xl overflow-hidden ${className}`}>
       <div className="h-8 leading-8 bg-primary text-white text-center">
@@ -20,7 +25,7 @@ const ColorPanel = ({ colors, activeColor, onChange, className = '' }) => {
             tabIndex="0"
             style={{ backgroundColor: color.cssRgbaValue }}
             onClick={() => {
-              onChange(color);
+              dispatch(exerciseActions.colorSelected(color));
             }}
           />
         ))}
