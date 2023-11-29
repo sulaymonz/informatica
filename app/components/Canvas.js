@@ -1,13 +1,22 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import {
+  useState,
+  useEffect,
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+} from 'react';
 import { useSelector } from 'react-redux';
 
-const Canvas = ({ images }) => {
+const Canvas = forwardRef(({ images }, ref) => {
   const onScreenCvsRef = useRef();
   const onScreenCtxRef = useRef();
-  const offScreenCvsRef = useRef();
-  const offScreenCtxRef = useRef();
+  const fillCvsRef = useRef();
+  const fillCtxRef = useRef();
+  const points = useRef([]);
+  const undoStack = useRef([]);
+  const redoStack = useRef([]);
   const [curLoadedResNum, setCurLoadedResNum] = useState(0);
   const [mapImg, setMapImg] = useState(null);
   const [outlineImg, setOutlineImg] = useState(null);
@@ -16,7 +25,20 @@ const Canvas = ({ images }) => {
   );
   const totalResToLoad = images.length;
 
-  const onClick = (e) => {
+  useImperativeHandle(ref, () => ({
+    handleUndo() {
+      if (undoStack.current.length > 0) {
+        actionUndoRedo(redoStack.current, undoStack.current);
+      }
+    },
+    handleRedo() {
+      if (redoStack.current.length >= 1) {
+        actionUndoRedo(undoStack.current, redoStack.current);
+      }
+    },
+  }));
+
+  const onMouseDown = (e) => {
     /* if (curLoadedResNum < totalResToLoad) {
       return;
     } */
@@ -24,6 +46,21 @@ const Canvas = ({ images }) => {
     const mouseX = Math.floor(e.pageX - rect.x);
     const mouseY = Math.floor(e.pageY - rect.y);
     actionFill(mouseX, mouseY, brushColor);
+    points.current.push({
+      x: mouseX,
+      y: mouseY,
+      color: { ...brushColor },
+      mode: 'fill',
+    });
+    drawCanvas();
+  };
+
+  const onMouseUp = () => {
+    if (points.current.length) {
+      undoStack.current.push(points.current);
+    }
+    points.current = [];
+    redoStack.current = [];
   };
 
   const resourceLoaded = () => {
@@ -32,14 +69,14 @@ const Canvas = ({ images }) => {
 
   const actionFill = (startX, startY, currentColor) => {
     // get imageData
-    let colorLayer = offScreenCtxRef.current.getImageData(
+    let colorLayer = fillCtxRef.current.getImageData(
       0,
       0,
-      offScreenCvsRef.current.width,
-      offScreenCvsRef.current.height,
+      fillCvsRef.current.width,
+      fillCvsRef.current.height,
     );
 
-    let startPos = (startY * offScreenCvsRef.current.width + startX) * 4;
+    let startPos = (startY * fillCvsRef.current.width + startX) * 4;
 
     // clicked color
     let startR = colorLayer.data[startPos];
@@ -86,20 +123,20 @@ const Canvas = ({ images }) => {
       y = newPos[1];
 
       // get current pixel position
-      pixelPos = (y * offScreenCvsRef.current.width + x) * 4;
+      pixelPos = (y * fillCvsRef.current.width + x) * 4;
       // Go up as long as the color matches and are inside the canvas
       while (y >= 0 && matchStartColor(pixelPos)) {
         y--;
-        pixelPos -= offScreenCvsRef.current.width * 4;
+        pixelPos -= fillCvsRef.current.width * 4;
       }
       //Don't overextend
-      pixelPos += offScreenCvsRef.current.width * 4;
+      pixelPos += fillCvsRef.current.width * 4;
       y++;
       reachLeft = false;
       reachRight = false;
 
       // Go down as long as the color matches and in inside the canvas
-      while (y < offScreenCvsRef.current.height && matchStartColor(pixelPos)) {
+      while (y < fillCvsRef.current.height && matchStartColor(pixelPos)) {
         colorPixel(pixelPos);
         if (x > 0) {
           if (matchStartColor(pixelPos - 4)) {
@@ -112,7 +149,7 @@ const Canvas = ({ images }) => {
             reachLeft = false;
           }
         }
-        if (x < offScreenCvsRef.current.width - 1) {
+        if (x < fillCvsRef.current.width - 1) {
           if (matchStartColor(pixelPos + 4)) {
             if (!reachRight) {
               //Add pixel to stack
@@ -124,7 +161,7 @@ const Canvas = ({ images }) => {
           }
         }
         y++;
-        pixelPos += offScreenCvsRef.current.width * 4;
+        pixelPos += fillCvsRef.current.width * 4;
       }
 
       // recursive until no more pixels to change
@@ -135,10 +172,35 @@ const Canvas = ({ images }) => {
 
     floodFill();
 
-    // render floodFill result
-    offScreenCtxRef.current.putImageData(colorLayer, 0, 0);
-    onScreenCtxRef.current.drawImage(offScreenCvsRef.current, 0, 0, 870, 500);
+    // draw to fill-canvas
+    fillCtxRef.current.putImageData(colorLayer, 0, 0);
+  };
+
+  const drawCanvas = () => {
+    onScreenCtxRef.current.drawImage(fillCvsRef.current, 0, 0, 870, 500);
     onScreenCtxRef.current.drawImage(outlineImg, 0, 0, 870, 500);
+  };
+
+  const redrawPoints = () => {
+    undoStack.current.forEach((action) => {
+      action.forEach((p) => {
+        // switch start
+        actionFill(p.x, p.y, p.color);
+        // switch end
+      });
+    });
+  };
+
+  const actionUndoRedo = (pushStack, popStack) => {
+    pushStack.push(popStack.pop());
+    onScreenCtxRef.current.clearRect(
+      0,
+      0,
+      onScreenCvsRef.current.width,
+      onScreenCvsRef.current.height,
+    );
+    redrawPoints();
+    drawCanvas();
   };
 
   useEffect(() => {
@@ -153,16 +215,16 @@ const Canvas = ({ images }) => {
     };
 
     // fill availability area map on off screen canvas
-    offScreenCvsRef.current = document.createElement('canvas');
-    offScreenCvsRef.current.width = 870;
-    offScreenCvsRef.current.height = 500;
-    offScreenCtxRef.current = offScreenCvsRef.current.getContext('2d');
+    fillCvsRef.current = document.createElement('canvas');
+    fillCvsRef.current.width = 870;
+    fillCvsRef.current.height = 500;
+    fillCtxRef.current = fillCvsRef.current.getContext('2d');
     const img2 = new Image();
     img2.src = images.find((i) => i.type === 'map').src;
     img2.onload = () => {
       resourceLoaded();
       setMapImg(img2);
-      offScreenCtxRef.current.drawImage(img2, 0, 0, 870, 500);
+      fillCtxRef.current.drawImage(img2, 0, 0, 870, 500);
     };
   }, []);
 
@@ -172,9 +234,10 @@ const Canvas = ({ images }) => {
       ref={onScreenCvsRef}
       width="870"
       height="500"
-      onClick={onClick}
+      onMouseDown={onMouseDown}
+      onMouseUp={onMouseUp}
     ></canvas>
   );
-};
+});
 
 export default Canvas;

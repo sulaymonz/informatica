@@ -16,7 +16,7 @@ const icons = {
   redo: RedoIcon,
 };
 
-const ToolsPanel = ({ tools, className = '' }) => {
+const ToolsPanel = ({ tools, className = '', onClickUndo, onClickRedo }) => {
   const { activeTool } = useSelector((state) => state.exercise);
   const dispatch = useDispatch();
   return (
@@ -36,7 +36,13 @@ const ToolsPanel = ({ tools, className = '' }) => {
               role="button"
               tabIndex="0"
               onClick={() => {
-                dispatch(exerciseActions.toolSelected(tool));
+                if (tool === 'undo') {
+                  onClickUndo();
+                } else if (tool === 'redo') {
+                  onClickRedo();
+                } else {
+                  dispatch(exerciseActions.toolSelected(tool));
+                }
               }}
             >
               <Icon />
