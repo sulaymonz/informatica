@@ -23,6 +23,8 @@ const Canvas = forwardRef(({ images }, ref) => {
   const [mapImg, setMapImg] = useState(null);
   const [outlineImg, setOutlineImg] = useState(null);
   const [clicked, setClicked] = useState(false);
+  const lastPos = useRef({ x: null, y: null });
+  const drawInterval = 5;
   const { activeColor: brushColor, activeTool } = useSelector(
     (state) => state.exercise,
   );
@@ -46,20 +48,26 @@ const Canvas = forwardRef(({ images }, ref) => {
     const mouseX = Math.floor(e.pageX - rect.x);
     const mouseY = Math.floor(e.pageY - rect.y);
     if (clicked) {
-      switch (activeTool) {
-        case 'fill':
-          // do nothing
-          break;
-        case 'pencil':
-          actionDraw(mouseX, mouseY);
-          action.current.points.push({
-            x: mouseX,
-            y: mouseY,
-          });
-          drawCanvas();
-          break;
-        default:
-          break;
+      if (
+        Math.abs(mouseX - lastPos.current.x) > drawInterval ||
+        Math.abs(mouseY - lastPos.current.y) > drawInterval
+      ) {
+        switch (activeTool) {
+          case 'fill':
+            // do nothing
+            break;
+          case 'pencil':
+            actionDraw(mouseX, mouseY);
+            action.current.points.push({
+              x: mouseX,
+              y: mouseY,
+            });
+            drawCanvas();
+            break;
+          default:
+            break;
+        }
+        lastPos.current = { x: mouseX, y: mouseY };
       }
     }
   };
@@ -72,6 +80,7 @@ const Canvas = forwardRef(({ images }, ref) => {
     const rect = onScreenCvsRef.current.getBoundingClientRect();
     const mouseX = Math.floor(e.pageX - rect.x);
     const mouseY = Math.floor(e.pageY - rect.y);
+    lastPos.current = { x: mouseX, y: mouseY };
     switch (activeTool) {
       case 'fill':
         actionFill(mouseX, mouseY, brushColor);
