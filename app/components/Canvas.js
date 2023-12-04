@@ -16,7 +16,7 @@ const Canvas = forwardRef(({ images }, ref) => {
   const fillCtxRef = useRef();
   const pencilDrawCvs = useRef();
   const pencilDrawCtx = useRef();
-  const points = useRef([]);
+  const action = useRef({ type: '', color: {}, points: [] });
   const undoStack = useRef([]);
   const redoStack = useRef([]);
   const [curLoadedResNum, setCurLoadedResNum] = useState(0);
@@ -51,13 +51,10 @@ const Canvas = forwardRef(({ images }, ref) => {
           // do nothing
           break;
         case 'pencil':
-          actionDraw(mouseX, mouseY, brushColor);
-          points.current.push({
+          actionDraw(mouseX, mouseY);
+          action.current.points.push({
             x: mouseX,
             y: mouseY,
-            // size: brushSize,
-            color: { ...brushColor },
-            mode: activeTool,
           });
           drawCanvas();
           break;
@@ -78,23 +75,34 @@ const Canvas = forwardRef(({ images }, ref) => {
     switch (activeTool) {
       case 'fill':
         actionFill(mouseX, mouseY, brushColor);
-        points.current.push({
-          x: mouseX,
-          y: mouseY,
+        action.current = {
+          type: activeTool,
           color: { ...brushColor },
-          mode: activeTool,
-        });
+          points: [
+            {
+              x: mouseX,
+              y: mouseY,
+            },
+          ],
+        };
         drawCanvas();
         break;
       case 'pencil':
-        actionDraw(mouseX, mouseY, brushColor);
-        points.current.push({
-          x: mouseX,
-          y: mouseY,
-          // size: brushSize,
+        actionStartDraw(brushColor);
+        actionDraw(mouseX, mouseY);
+        action.current = {
+          type: activeTool,
           color: { ...brushColor },
-          mode: activeTool,
-        });
+          // size: brushSize,
+          points: [
+            {
+              x: mouseX,
+              y: mouseY,
+              // size: brushSize,
+              color: { ...brushColor },
+            },
+          ],
+        };
         drawCanvas();
       default:
         break;
@@ -103,12 +111,14 @@ const Canvas = forwardRef(({ images }, ref) => {
 
   const onMouseUp = () => {
     setClicked(false);
-    if (points.current.length) {
-      undoStack.current.push(points.current);
+    if (action.current.points.length) {
+      undoStack.current.push(action.current);
     }
-    points.current = [];
+    if (activeTool === 'pencil') {
+      // do nothing
+    }
+    action.current = { type: '', color: {}, points: [] };
     redoStack.current = [];
-    console.log(undoStack.current);
   };
 
   const resourceLoaded = () => {
@@ -116,11 +126,15 @@ const Canvas = forwardRef(({ images }, ref) => {
   };
 
   // Action functions
-  const actionDraw = (x, y, currentColor) => {
-    pencilDrawCtx.current.fillStyle = currentColor.cssRgbaValue;
-    pencilDrawCtx.current.fillRect(x, y, 4, 4);
+  const actionStartDraw = (color) => {
+    pencilDrawCtx.current.strokeStyle = color.cssRgbaValue;
+    pencilDrawCtx.current.beginPath();
   };
 
+  const actionDraw = (x, y) => {
+    pencilDrawCtx.current.lineTo(x, y);
+    pencilDrawCtx.current.stroke();
+  };
   const actionFill = (startX, startY, currentColor) => {
     // get imageData
     let colorLayer = fillCtxRef.current.getImageData(
@@ -249,17 +263,20 @@ const Canvas = forwardRef(({ images }, ref) => {
 
   const redrawPoints = () => {
     undoStack.current.forEach((action) => {
-      action.forEach((p) => {
-        switch (p.mode) {
-          case 'fill':
-            actionFill(p.x, p.y, p.color);
-            break;
-          case 'pencil':
-            actionDraw(p.x, p.y, p.color);
-          default:
-            break;
-        }
-      });
+      switch (action.type) {
+        case 'fill':
+          action.points.forEach((p) => {
+            actionFill(p.x, p.y, action.color);
+          });
+          break;
+        case 'pencil':
+          actionStartDraw(action.color);
+          action.points.forEach((p) => {
+            actionDraw(p.x, p.y);
+          });
+        default:
+          break;
+      }
     });
   };
 
@@ -292,6 +309,10 @@ const Canvas = forwardRef(({ images }, ref) => {
     pencilDrawCvs.current.width = 870;
     pencilDrawCvs.current.height = 500;
     pencilDrawCtx.current = pencilDrawCvs.current.getContext('2d');
+    // pencilDrawCtx.current.lineWidth = brushSize;
+    pencilDrawCtx.current.lineWidth = 4;
+    pencilDrawCtx.current.lineCap = 'round';
+    pencilDrawCtx.current.lineJoin = 'round';
   }, []);
 
   return (
