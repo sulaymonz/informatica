@@ -45,8 +45,8 @@ const Canvas = forwardRef(({ images }, ref) => {
 
   const onMouseMove = (e) => {
     const rect = onScreenCvsRef.current.getBoundingClientRect();
-    const mouseX = Math.floor(e.pageX - rect.x);
-    const mouseY = Math.floor(e.pageY - rect.y);
+    const mouseX = e.clientX - rect.x;
+    const mouseY = e.clientY - rect.y;
     if (clicked) {
       if (
         Math.abs(mouseX - lastPos.current.x) > drawInterval ||
@@ -78,8 +78,8 @@ const Canvas = forwardRef(({ images }, ref) => {
     } */
     setClicked(true);
     const rect = onScreenCvsRef.current.getBoundingClientRect();
-    const mouseX = Math.floor(e.pageX - rect.x);
-    const mouseY = Math.floor(e.pageY - rect.y);
+    const mouseX = e.clientX - rect.x;
+    const mouseY = e.clientY - rect.y;
     lastPos.current = { x: mouseX, y: mouseY };
     switch (activeTool) {
       case 'fill':
