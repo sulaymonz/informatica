@@ -22,7 +22,7 @@ const ExercisePanel = ({ colors }) => {
       <div>
         <ToolsPanel
           className="mb-4"
-          tools={['undo', 'redo', 'pencil', 'fill', 'grab']}
+          tools={['pencil', 'fill', 'grab', 'undo', 'redo']}
           onClickUndo={onClickUndo}
           onClickRedo={onClickRedo}
         />
@@ -36,12 +36,12 @@ const ExercisePanel = ({ colors }) => {
             bgColor="#f2cfd2"
             images={[
               {
-                type: 'map',
-                src: '/images/exercises/grade1/grade1_exercise1-map.png',
+                type: 'mainImage',
+                src: '/images/exercises/grade1/exercise6-mainImage.png',
               },
               {
-                type: 'outline',
-                src: '/images/exercises/grade1/grade1_exercise1-outline.png',
+                type: 'fillArea',
+                src: '/images/exercises/grade1/exercise6-fillArea.png',
               },
             ]}
           />

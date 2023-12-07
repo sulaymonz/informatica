@@ -20,8 +20,8 @@ const Canvas = forwardRef(({ images }, ref) => {
   const undoStack = useRef([]);
   const redoStack = useRef([]);
   const [curLoadedResNum, setCurLoadedResNum] = useState(0);
-  const [mapImg, setMapImg] = useState(null);
-  const [outlineImg, setOutlineImg] = useState(null);
+  const [fillAreaImg, setFillAreaImg] = useState(null);
+  const [mainImg, setMainImg] = useState(null);
   const [clicked, setClicked] = useState(false);
   const lastPos = useRef({ x: null, y: null });
   const drawInterval = 5;
@@ -161,6 +161,8 @@ const Canvas = forwardRef(({ images }, ref) => {
     let startB = colorLayer.data[startPos + 2];
     let startA = colorLayer.data[startPos + 3];
 
+    console.log('rgba', startR, startG, startB, startA, currentColor);
+
     // exit if transparent
     if (startA === 0) {
       return;
@@ -256,7 +258,7 @@ const Canvas = forwardRef(({ images }, ref) => {
   const drawCanvas = () => {
     onScreenCtxRef.current.clearRect(0, 0, 870, 500);
     onScreenCtxRef.current.drawImage(fillCvsRef.current, 0, 0, 870, 500);
-    onScreenCtxRef.current.drawImage(outlineImg, 0, 0, 870, 500);
+    onScreenCtxRef.current.drawImage(mainImg, 0, 0, 870, 500);
     onScreenCtxRef.current.drawImage(pencilDrawCvs.current, 0, 0, 870, 500);
   };
 
@@ -264,7 +266,7 @@ const Canvas = forwardRef(({ images }, ref) => {
   const actionUndoRedo = (pushStack, popStack) => {
     pushStack.push(popStack.pop());
     fillCtxRef.current.clearRect(0, 0, 870, 500);
-    fillCtxRef.current.drawImage(mapImg, 0, 0, 870, 500);
+    fillCtxRef.current.drawImage(fillAreaImg, 0, 0, 870, 500);
     pencilDrawCtx.current.clearRect(0, 0, 870, 500);
     redrawPoints();
     drawCanvas();
@@ -290,26 +292,26 @@ const Canvas = forwardRef(({ images }, ref) => {
   };
 
   useEffect(() => {
-    // outline on onscreen canvas
+    // main image
     onScreenCtxRef.current = onScreenCvsRef.current.getContext('2d');
     const img1 = new Image();
-    img1.src = images.find((i) => i.type === 'outline').src;
+    img1.src = images.find((i) => i.type === 'mainImage').src;
     img1.onload = () => {
       resourceLoaded();
-      setOutlineImg(img1);
+      setMainImg(img1);
       onScreenCtxRef.current.drawImage(img1, 0, 0, 870, 500);
     };
 
-    // fill availability area map on off screen canvas
+    // fill availability area map on a separate canvas
     fillCvsRef.current = document.createElement('canvas');
     fillCvsRef.current.width = 870;
     fillCvsRef.current.height = 500;
     fillCtxRef.current = fillCvsRef.current.getContext('2d');
     const img2 = new Image();
-    img2.src = images.find((i) => i.type === 'map').src;
+    img2.src = images.find((i) => i.type === 'fillArea').src;
     img2.onload = () => {
       resourceLoaded();
-      setMapImg(img2);
+      setFillAreaImg(img2);
       fillCtxRef.current.drawImage(img2, 0, 0, 870, 500);
     };
 
