@@ -56,6 +56,9 @@ const Canvas = forwardRef(({ images }, ref) => {
           case 'fill':
             // do nothing
             break;
+          case 'eraser':
+            // do nothing
+            break;
           case 'pencil':
             actionDraw(mouseX, mouseY);
             action.current.points.push({
@@ -87,6 +90,20 @@ const Canvas = forwardRef(({ images }, ref) => {
         action.current = {
           type: activeTool,
           color: { ...brushColor },
+          points: [
+            {
+              x: mouseX,
+              y: mouseY,
+            },
+          ],
+        };
+        drawCanvas();
+        break;
+      case 'eraser':
+        actionFill(mouseX, mouseY, { r: 255, g: 255, b: 255, a: 255 });
+        action.current = {
+          type: activeTool,
+          color: { r: 255, g: 255, b: 255, a: 255 },
           points: [
             {
               x: mouseX,
@@ -160,8 +177,6 @@ const Canvas = forwardRef(({ images }, ref) => {
     let startG = colorLayer.data[startPos + 1];
     let startB = colorLayer.data[startPos + 2];
     let startA = colorLayer.data[startPos + 3];
-
-    console.log('rgba', startR, startG, startB, startA, currentColor);
 
     // exit if transparent
     if (startA === 0) {
@@ -276,6 +291,11 @@ const Canvas = forwardRef(({ images }, ref) => {
     undoStack.current.forEach((action) => {
       switch (action.type) {
         case 'fill':
+          action.points.forEach((p) => {
+            actionFill(p.x, p.y, action.color);
+          });
+          break;
+        case 'eraser':
           action.points.forEach((p) => {
             actionFill(p.x, p.y, action.color);
           });

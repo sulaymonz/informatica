@@ -22,7 +22,7 @@ const ExercisePanel = ({ colors }) => {
       <div>
         <ToolsPanel
           className="mb-4"
-          tools={['pencil', 'fill', 'grab', 'undo', 'redo']}
+          tools={['fill', 'eraser', 'pencil', 'grab', 'undo', 'redo']}
           onClickUndo={onClickUndo}
           onClickRedo={onClickRedo}
         />

@@ -3,6 +3,7 @@
 import { useSelector, useDispatch } from 'react-redux';
 import * as exerciseActions from '../../store/actions/exerciseActions';
 import CreateIcon from '@mui/icons-material/Create';
+import ClearIcon from '@mui/icons-material/Clear';
 import PanToolIcon from '@mui/icons-material/PanTool';
 import FormatColorFillIcon from '@mui/icons-material/FormatColorFill';
 import UndoIcon from '@mui/icons-material/Undo';
@@ -10,6 +11,7 @@ import RedoIcon from '@mui/icons-material/Redo';
 
 const icons = {
   pencil: CreateIcon,
+  eraser: ClearIcon,
   fill: FormatColorFillIcon,
   grab: PanToolIcon,
   undo: UndoIcon,
