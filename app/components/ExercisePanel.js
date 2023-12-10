@@ -33,15 +33,14 @@ const ExercisePanel = ({ colors }) => {
         <div className="rounded-lg shadow-xl overflow-hidden">
           <Canvas
             ref={canvasRef}
-            bgColor="#f2cfd2"
             images={[
               {
                 type: 'mainImage',
-                src: '/images/exercises/grade1/exercise6-mainImage.png',
+                src: '/images/exercises/grade1/exercise45-mainImage.png',
               },
               {
                 type: 'fillArea',
-                src: '/images/exercises/grade1/exercise6-fillArea.png',
+                src: '/images/exercises/grade1/exercise45-fillArea.png',
               },
             ]}
           />
