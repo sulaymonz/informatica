@@ -313,15 +313,6 @@ const Canvas = forwardRef(({ images }, ref) => {
     curLoadedResNum++;
   };
 
-  useEffect(() => {
-    if (curLoadedResNum === totalResToLoad) {
-      setLoading(false);
-      fillCtxRef.current.drawImage(fillAreaImg, 0, 0, 870, 500);
-      onScreenCtxRef.current.drawImage(fillCvsRef.current, 0, 0, 870, 500);
-      onScreenCtxRef.current.drawImage(mainImg, 0, 0, 870, 500);
-    }
-  }, [mainImg, fillAreaImg]);
-
   const handleMainImgLoad = (e) => {
     setMainImg(e.target);
     resourceLoaded();
@@ -331,6 +322,15 @@ const Canvas = forwardRef(({ images }, ref) => {
     setFillAreaImg(e.target);
     resourceLoaded();
   };
+
+  useEffect(() => {
+    if (curLoadedResNum === totalResToLoad) {
+      setLoading(false);
+      fillCtxRef.current.drawImage(fillAreaImg, 0, 0, 870, 500);
+      onScreenCtxRef.current.drawImage(fillCvsRef.current, 0, 0, 870, 500);
+      onScreenCtxRef.current.drawImage(mainImg, 0, 0, 870, 500);
+    }
+  }, [mainImg, fillAreaImg]);
 
   useEffect(() => {
     // main image
