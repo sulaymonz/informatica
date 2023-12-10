@@ -9,7 +9,10 @@ import {
 } from 'react';
 import { useSelector } from 'react-redux';
 
+let curLoadedResNum = 0;
+
 const Canvas = forwardRef(({ images }, ref) => {
+  const totalResToLoad = images.length;
   const onScreenCvsRef = useRef();
   const onScreenCtxRef = useRef();
   const fillCvsRef = useRef();
@@ -19,7 +22,7 @@ const Canvas = forwardRef(({ images }, ref) => {
   const action = useRef({ type: '', color: {}, points: [] });
   const undoStack = useRef([]);
   const redoStack = useRef([]);
-  const [curLoadedResNum, setCurLoadedResNum] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [fillAreaImg, setFillAreaImg] = useState(null);
   const [mainImg, setMainImg] = useState(null);
   const [clicked, setClicked] = useState(false);
@@ -28,7 +31,6 @@ const Canvas = forwardRef(({ images }, ref) => {
   const { activeColor: brushColor, activeTool } = useSelector(
     (state) => state.exercise,
   );
-  const totalResToLoad = images.length;
 
   useImperativeHandle(ref, () => ({
     handleUndo() {
@@ -147,10 +149,6 @@ const Canvas = forwardRef(({ images }, ref) => {
     redoStack.current = [];
   };
 
-  const resourceLoaded = () => {
-    setCurLoadedResNum(curLoadedResNum + 1);
-  };
-
   // Action functions
   const actionStartDraw = (color) => {
     pencilDrawCtx.current.strokeStyle = color.cssRgbaValue;
@@ -208,7 +206,7 @@ const Canvas = forwardRef(({ images }, ref) => {
       colorLayer.data[pixelPos] = currentColor.r;
       colorLayer.data[pixelPos + 1] = currentColor.g;
       colorLayer.data[pixelPos + 2] = currentColor.b;
-      colorLayer.data[pixelPos + 3] = 255;
+      // colorLayer.data[pixelPos + 3] = 255;
     };
 
     const floodFill = () => {
@@ -311,16 +309,35 @@ const Canvas = forwardRef(({ images }, ref) => {
     });
   };
 
+  const resourceLoaded = () => {
+    curLoadedResNum++;
+  };
+
+  useEffect(() => {
+    if (curLoadedResNum === totalResToLoad) {
+      setLoading(false);
+      fillCtxRef.current.drawImage(fillAreaImg, 0, 0, 870, 500);
+      onScreenCtxRef.current.drawImage(fillCvsRef.current, 0, 0, 870, 500);
+      onScreenCtxRef.current.drawImage(mainImg, 0, 0, 870, 500);
+    }
+  }, [mainImg, fillAreaImg]);
+
+  const handleMainImgLoad = (e) => {
+    setMainImg(e.target);
+    resourceLoaded();
+  };
+
+  const handleFillImgLoad = (e) => {
+    setFillAreaImg(e.target);
+    resourceLoaded();
+  };
+
   useEffect(() => {
     // main image
     onScreenCtxRef.current = onScreenCvsRef.current.getContext('2d');
     const img1 = new Image();
     img1.src = images.find((i) => i.type === 'mainImage').src;
-    img1.onload = () => {
-      resourceLoaded();
-      setMainImg(img1);
-      onScreenCtxRef.current.drawImage(img1, 0, 0, 870, 500);
-    };
+    img1.addEventListener('load', handleMainImgLoad);
 
     // fill availability area map on a separate canvas
     fillCvsRef.current = document.createElement('canvas');
@@ -329,11 +346,7 @@ const Canvas = forwardRef(({ images }, ref) => {
     fillCtxRef.current = fillCvsRef.current.getContext('2d');
     const img2 = new Image();
     img2.src = images.find((i) => i.type === 'fillArea').src;
-    img2.onload = () => {
-      resourceLoaded();
-      setFillAreaImg(img2);
-      fillCtxRef.current.drawImage(img2, 0, 0, 870, 500);
-    };
+    img2.addEventListener('load', handleFillImgLoad);
 
     // a separate canvas for pencil draw
     pencilDrawCvs.current = document.createElement('canvas');
@@ -344,18 +357,26 @@ const Canvas = forwardRef(({ images }, ref) => {
     pencilDrawCtx.current.lineWidth = 4;
     pencilDrawCtx.current.lineCap = 'round';
     pencilDrawCtx.current.lineJoin = 'round';
+
+    return () => {
+      img1.removeEventListener('load', handleMainImgLoad);
+      img2.removeEventListener('load', handleFillImgLoad);
+    };
   }, []);
 
   return (
-    <canvas
-      className="cursor-crosshair"
-      ref={onScreenCvsRef}
-      width="870"
-      height="500"
-      onMouseDown={onMouseDown}
-      onMouseUp={onMouseUp}
-      onMouseMove={onMouseMove}
-    />
+    <>
+      {loading && 'loading...'}
+      <canvas
+        className="cursor-crosshair bg-secondary-light"
+        ref={onScreenCvsRef}
+        width="870"
+        height="500"
+        onMouseDown={onMouseDown}
+        onMouseUp={onMouseUp}
+        onMouseMove={onMouseMove}
+      />
+    </>
   );
 });
 
