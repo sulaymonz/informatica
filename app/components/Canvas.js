@@ -8,7 +8,11 @@ import {
   useImperativeHandle,
 } from 'react';
 import { useSelector } from 'react-redux';
+import resolveConfig from 'tailwindcss/resolveConfig';
+import tailwindConfig from '../../tailwind.config';
+import LoadingSpinner from './LoadingSpinner';
 
+const fullConfig = resolveConfig(tailwindConfig);
 let curLoadedResNum = 0;
 
 const Canvas = forwardRef(({ images }, ref) => {
@@ -359,14 +363,23 @@ const Canvas = forwardRef(({ images }, ref) => {
     pencilDrawCtx.current.lineJoin = 'round';
 
     return () => {
+      // clearing things up on component unmount
       img1.removeEventListener('load', handleMainImgLoad);
       img2.removeEventListener('load', handleFillImgLoad);
+      curLoadedResNum = 0;
     };
   }, []);
 
   return (
     <>
-      {loading && 'loading...'}
+      {loading && (
+        <div className="absolute w-[870px] h-[500px] flex justify-center items-center">
+          <LoadingSpinner
+            mainColor={fullConfig.theme.colors.white}
+            secondaryColor="none"
+          />
+        </div>
+      )}
       <canvas
         className="cursor-crosshair bg-secondary-light"
         ref={onScreenCvsRef}
