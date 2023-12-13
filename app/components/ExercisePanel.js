@@ -1,13 +1,16 @@
 'use client';
 
 import { useRef } from 'react';
+import { useSelector } from 'react-redux';
 import Canvas from './Canvas';
+import DocumentPanel from './DocumentPanel';
 import ToolsPanel from '../components/ToolsPanel';
 import ColorPanel from '../components/ColorPanel';
 import CurrentColorPanel from './CurrentColorPanel';
 
 const ExercisePanel = ({ colors }) => {
   const canvasRef = useRef();
+  const { key } = useSelector((state) => state.exercise);
 
   const onClickUndo = () => {
     canvasRef.current.handleUndo();
@@ -20,6 +23,7 @@ const ExercisePanel = ({ colors }) => {
   return (
     <div className="w-full flex flex-row justify-center items-center gap-4">
       <div>
+        <DocumentPanel className="mb-4" />
         <ToolsPanel
           className="mb-4"
           tools={['fill', 'eraser', 'pencil', 'grab', 'undo', 'redo']}
@@ -32,6 +36,7 @@ const ExercisePanel = ({ colors }) => {
       <div>
         <div className="rounded-lg shadow-xl overflow-hidden">
           <Canvas
+            key={key}
             ref={canvasRef}
             images={[
               {

@@ -1,5 +1,6 @@
 const initialState = {
   exercise: {
+    key: 1,
     activeColor: {
       name: 'Красный',
       cssRgbaValue: 'rgba(255, 0, 0, 255)',

@@ -15,7 +15,7 @@ import LoadingSpinner from './LoadingSpinner';
 const fullConfig = resolveConfig(tailwindConfig);
 let curLoadedResNum = 0;
 
-const Canvas = forwardRef(({ images }, ref) => {
+const Canvas = forwardRef(({ images, keyy }, ref) => {
   const totalResToLoad = images.length;
   const onScreenCvsRef = useRef();
   const onScreenCtxRef = useRef();

@@ -8,3 +8,7 @@ export function colorSelected(color) {
 export function toolSelected(tool) {
   return { type: types.TOOL_SELECTED, tool };
 }
+
+export function resetExercise() {
+  return { type: types.RESET_EXERCISE };
+}

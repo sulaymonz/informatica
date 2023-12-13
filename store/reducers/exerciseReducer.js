@@ -15,6 +15,9 @@ export default (state = initialState.exercise, action) => {
       case types.TOOL_SELECTED:
         draft.activeTool = action.tool;
         break;
+      case types.RESET_EXERCISE:
+        draft.key++;
+        break;
       default:
         return state;
     }
