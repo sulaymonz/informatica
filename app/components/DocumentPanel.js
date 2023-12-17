@@ -14,7 +14,7 @@ const DocumentPanel = ({ className = '' }) => {
       </div>
       <div className="grid grid-cols-2 gap-4 p-4">
         <div
-          title="Создать новый"
+          title="Сначала"
           className="flex justify-center items-center h-[30px] w-[30px] rounded-lg shadow hover:shadow-lg cursor-pointer"
           role="button"
           tabIndex="0"
