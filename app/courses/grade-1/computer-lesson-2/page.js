@@ -101,6 +101,7 @@ export default function ComputerLesson() {
     <ExercisePage
       title='Компьютерный урок "Правила раскрашивания". Задачи 1-5'
       exercises={[...exercises]}
+      backUrl="/courses/grade-1"
     />
   );
 }

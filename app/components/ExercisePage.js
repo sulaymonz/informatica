@@ -1,14 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import ExercisePanel from '../components/ExercisePanel';
 
-export default function ExercisePage({ title, exercises }) {
+export default function ExercisePage({ title, exercises, backUrl }) {
   const [index, setIndex] = useState(0);
   return (
     <main>
       <div className="container mx-auto pb-20">
         <h1 className="my-5 text-3xl text-primary text-center">{title}</h1>
+        <div className="text-center">
+          <Link className="text-primary text-xs" href={backUrl}>
+            Назад
+          </Link>
+        </div>
         <div className="w-full flex flex-row justify-center items-center gap-4 select-none">
           <span
             className="cursor-pointer text-primary"

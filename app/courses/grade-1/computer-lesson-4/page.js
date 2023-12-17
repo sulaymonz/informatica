@@ -92,6 +92,7 @@ export default function ComputerLesson() {
     <ExercisePage
       title='Компьютерный урок "Цвет". Задачи 6-10'
       exercises={[...exercises]}
+      backUrl="/courses/grade-1"
     />
   );
 }
