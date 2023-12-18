@@ -37,6 +37,60 @@ export default function Grade1() {
               <strong>Урок - 4:</strong> Компьютерный урок "Цвет". Задачи 6-10
             </Link>
           </li>
+          <li>
+            <Link
+              className="text-accent hover:text-primary"
+              href="/courses/grade-1/computer-lesson-5"
+            >
+              <strong>Урок - 5:</strong> Компьютерный урок "Области". Задачи
+              11-14
+            </Link>
+          </li>
+          <li>
+            <Link
+              className="text-accent hover:text-primary"
+              href="/courses/grade-1/computer-lesson-8"
+            >
+              <strong>Урок - 8:</strong> Компьютерный урок "Одинаковые, разные".
+              Задачи 15-19
+            </Link>
+          </li>
+          <li>
+            <Link
+              className="text-accent hover:text-primary"
+              href="/courses/grade-1/computer-lesson-9"
+            >
+              <strong>Урок - 9:</strong> Компьютерный урок "Обведи". Задачи 20 -
+              24
+            </Link>
+          </li>
+          <li>
+            <Link
+              className="text-accent hover:text-primary"
+              href="/courses/grade-1/computer-lesson-10"
+            >
+              <strong>Урок - 10:</strong> Компьютерный урок "Соедини". Задачи 25
+              - 30
+            </Link>
+          </li>
+          <li>
+            <Link
+              className="text-accent hover:text-primary"
+              href="/courses/grade-1/computer-lesson-12"
+            >
+              <strong>Урок - 12:</strong> Компьютерный урок "Одинаковые и разные
+              бусины". Задачи 31 - 35
+            </Link>
+          </li>
+          <li>
+            <Link
+              className="text-accent hover:text-primary"
+              href="/courses/grade-1/computer-lesson-16"
+            >
+              <strong>Урок - 16:</strong> Компьютерный урок "Решение задач. 1
+              четверть". Задачи 36 - 45
+            </Link>
+          </li>
         </ul>
       </div>
     </main>
