@@ -8,6 +8,7 @@ import PanToolIcon from '@mui/icons-material/PanTool';
 import FormatColorFillIcon from '@mui/icons-material/FormatColorFill';
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
 
 const icons = {
   pencil: CreateIcon,
@@ -16,6 +17,7 @@ const icons = {
   grab: PanToolIcon,
   undo: UndoIcon,
   redo: RedoIcon,
+  tree: AccountTreeIcon,
 };
 
 const ToolsPanel = ({ tools, className = '', onClickUndo, onClickRedo }) => {

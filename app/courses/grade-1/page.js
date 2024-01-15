@@ -91,6 +91,14 @@ export default function Grade1() {
               четверть". Задачи 36 - 45
             </Link>
           </li>
+          <li>
+            <Link
+              className="text-accent hover:text-primary"
+              href="/courses/grade-1/sample-tree-lesson"
+            >
+              <strong>Урок:</strong> Тестовая задача "Дерево"
+            </Link>
+          </li>
         </ul>
       </div>
     </main>
