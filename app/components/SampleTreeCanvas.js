@@ -36,7 +36,7 @@ const Canvas = ({ images }) => {
     const mouseY = e.clientY - rect.y;
     if (activeTool === 'grab' && grabbing) {
       drawGrabbing(mouseX, mouseY);
-      drawCanvas();
+      redrawCanvas();
     }
   };
 
@@ -67,6 +67,7 @@ const Canvas = ({ images }) => {
   useEffect(() => {
     if (!grabbing && !loading) {
       clearGrabbing();
+      redrawCanvas();
     }
   }, [grabbing]);
 
@@ -126,7 +127,7 @@ const Canvas = ({ images }) => {
     grabCtxRef.current.clearRect(0, 0, 870, 500);
   };
 
-  const drawCanvas = () => {
+  const redrawCanvas = () => {
     /*
     onScreenCtxRef.current.clearRect(0, 0, 870, 500);
     onScreenCtxRef.current.drawImage(fillCvsRef.current, 0, 0, 870, 500);
@@ -153,7 +154,7 @@ const Canvas = ({ images }) => {
     if (curLoadedResNum === totalResToLoad) {
       setLoading(false);
       drawItemsBar();
-      drawCanvas();
+      redrawCanvas();
     }
   }, [itemImages]);
 
