@@ -5,9 +5,14 @@ import { useSelector } from 'react-redux';
 import resolveConfig from 'tailwindcss/resolveConfig';
 import tailwindConfig from '../../tailwind.config';
 import LoadingSpinner from './LoadingSpinner';
+import { Battery50 } from '@mui/icons-material';
 
 const fullConfig = resolveConfig(tailwindConfig);
 let curLoadedResNum = 0;
+const itemSize = 50;
+const itemPadding = 5;
+const itemBarX = 800;
+const itemBarY = 25;
 
 const Canvas = ({ images }) => {
   const totalResToLoad = images.length;
@@ -17,43 +22,67 @@ const Canvas = ({ images }) => {
   const gridCtxRef = useRef();
   const itemsCvsRef = useRef();
   const itemsCtxRef = useRef();
+  const grabCvsRef = useRef();
+  const grabCtxRef = useRef();
   const [loading, setLoading] = useState(true);
   const [itemImages, setItemImages] = useState([]);
-  const [clicked, setClicked] = useState(false);
+  const [grabbing, setGrabbing] = useState(false);
+  const [grabbingItem, setGrabbingItem] = useState(null);
   const { activeTool } = useSelector((state) => state.exercise);
 
   const onMouseMove = (e) => {
     const rect = onScreenCvsRef.current.getBoundingClientRect();
     const mouseX = e.clientX - rect.x;
     const mouseY = e.clientY - rect.y;
-    if (activeTool === 'move' && clicked) {
-      // move action
+    if (activeTool === 'grab' && grabbing) {
+      drawGrabbing(mouseX, mouseY);
+      drawCanvas();
     }
   };
 
   const onMouseDown = (e) => {
-    setClicked(true);
     const rect = onScreenCvsRef.current.getBoundingClientRect();
     const mouseX = e.clientX - rect.x;
     const mouseY = e.clientY - rect.y;
-    if (activeTool === 'move') {
-      // do something
+    if (activeTool === 'grab') {
+      if (
+        mouseX >= itemBarX - itemPadding &&
+        mouseX <= itemBarX + itemSize + itemPadding &&
+        mouseY >= itemBarY - itemPadding &&
+        mouseY <=
+          itemBarY -
+            itemPadding +
+            itemImages.length * (itemSize + itemPadding * 2)
+      ) {
+        setGrabbing(true);
+        setGrabbingItem(
+          itemImages[
+            Math.floor((mouseY - itemBarY) / (itemSize + itemPadding * 2))
+          ],
+        );
+      }
     }
   };
 
+  useEffect(() => {
+    if (!grabbing && !loading) {
+      clearGrabbing();
+    }
+  }, [grabbing]);
+
   const onMouseUp = () => {
-    setClicked(false);
-    if (activeTool === 'move') {
+    setGrabbing(false);
+    if (activeTool === 'grab') {
       // do nothing
     }
   };
 
   const drawGrid = () => {
     const grid = [
-      ['', '', '', '', ''],
-      ['', '', '', '', ''],
-      ['', '', '', '', ''],
-      ['', '', '', '', ''],
+      ['', '', '', '', '', ''],
+      ['', '', '', '', '', ''],
+      ['', '', '', '', '', ''],
+      ['', '', '', '', '', ''],
     ];
 
     grid.forEach((row, i) => {
@@ -70,9 +99,31 @@ const Canvas = ({ images }) => {
   };
 
   const drawItemsBar = () => {
+    itemsCtxRef.current.globalAlpha = 0.5;
+    itemsCtxRef.current.fillStyle = '#ffffff';
+    itemsCtxRef.current.fillRect(
+      itemBarX - itemPadding,
+      itemBarY - itemPadding,
+      itemSize + itemPadding * 2,
+      itemImages.length * (itemSize + itemPadding * 2),
+    );
+    itemsCtxRef.current.globalAlpha = 1;
     itemImages.forEach((img, i) => {
-      itemsCtxRef.current.drawImage(img, 800, 25 + i * 60);
+      itemsCtxRef.current.drawImage(
+        img,
+        itemBarX,
+        itemBarY + i * (itemSize + itemPadding * 2),
+      );
     });
+  };
+
+  const drawGrabbing = (x, y) => {
+    clearGrabbing();
+    grabCtxRef.current.drawImage(grabbingItem, x - 25, y - 25, 50, 50);
+  };
+
+  const clearGrabbing = () => {
+    grabCtxRef.current.clearRect(0, 0, 870, 500);
   };
 
   const drawCanvas = () => {
@@ -82,8 +133,10 @@ const Canvas = ({ images }) => {
     onScreenCtxRef.current.drawImage(mainImg, 0, 0, 870, 500);
     onScreenCtxRef.current.drawImage(pencilDrawCvs.current, 0, 0, 870, 500);
     */
+    onScreenCtxRef.current.clearRect(0, 0, 870, 500);
     onScreenCtxRef.current.drawImage(gridCvsRef.current, 0, 0, 870, 500);
     onScreenCtxRef.current.drawImage(itemsCvsRef.current, 0, 0, 870, 500);
+    onScreenCtxRef.current.drawImage(grabCvsRef.current, 0, 0, 870, 500);
   };
 
   const resourceLoaded = () => {
@@ -120,6 +173,12 @@ const Canvas = ({ images }) => {
     itemsCvsRef.current.height = 500;
     itemsCtxRef.current = itemsCvsRef.current.getContext('2d');
 
+    // a separate canvas for grabbed item
+    grabCvsRef.current = document.createElement('canvas');
+    grabCvsRef.current.width = 870;
+    grabCvsRef.current.height = 500;
+    grabCtxRef.current = grabCvsRef.current.getContext('2d');
+
     setItemImages([]);
     const tempImages = [];
     images
@@ -151,7 +210,9 @@ const Canvas = ({ images }) => {
         </div>
       )}
       <canvas
-        className="cursor-crosshair bg-secondary-light"
+        className={`cursor-crosshair ${
+          activeTool === 'grab' ? 'cursor-grab' : ''
+        } ${grabbing ? 'cursor-grabbing' : ''} bg-secondary-light`}
         ref={onScreenCvsRef}
         width="870"
         height="500"
