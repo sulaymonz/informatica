@@ -13,8 +13,12 @@ const Canvas = ({ images }) => {
   const totalResToLoad = images.length;
   const onScreenCvsRef = useRef();
   const onScreenCtxRef = useRef();
+  const gridCvsRef = useRef();
+  const gridCtxRef = useRef();
+  const itemsCvsRef = useRef();
+  const itemsCtxRef = useRef();
   const [loading, setLoading] = useState(true);
-  const [mainImg, setMainImg] = useState(null);
+  const [itemImages, setItemImages] = useState([]);
   const [clicked, setClicked] = useState(false);
   const { activeTool } = useSelector((state) => state.exercise);
 
@@ -44,6 +48,33 @@ const Canvas = ({ images }) => {
     }
   };
 
+  const drawGrid = () => {
+    const grid = [
+      ['', '', '', '', ''],
+      ['', '', '', '', ''],
+      ['', '', '', '', ''],
+      ['', '', '', '', ''],
+    ];
+
+    grid.forEach((row, i) => {
+      row.forEach((spot, j) => {
+        const spotX = j * (2 * 50 + 25) + 70;
+        const spotY = i * (2 * 50 + 25) + 63;
+        gridCtxRef.current.globalAlpha = 0.03;
+        gridCtxRef.current.beginPath();
+        gridCtxRef.current.arc(spotX, spotY, 50, 0, 2 * Math.PI);
+        gridCtxRef.current.fillStyle = 'red';
+        gridCtxRef.current.fill();
+      });
+    });
+  };
+
+  const drawItemsBar = () => {
+    itemImages.forEach((img, i) => {
+      itemsCtxRef.current.drawImage(img, 800, 25 + i * 60);
+    });
+  };
+
   const drawCanvas = () => {
     /*
     onScreenCtxRef.current.clearRect(0, 0, 870, 500);
@@ -51,68 +82,62 @@ const Canvas = ({ images }) => {
     onScreenCtxRef.current.drawImage(mainImg, 0, 0, 870, 500);
     onScreenCtxRef.current.drawImage(pencilDrawCvs.current, 0, 0, 870, 500);
     */
+    onScreenCtxRef.current.drawImage(gridCvsRef.current, 0, 0, 870, 500);
+    onScreenCtxRef.current.drawImage(itemsCvsRef.current, 0, 0, 870, 500);
   };
 
   const resourceLoaded = () => {
     curLoadedResNum++;
   };
 
-  const handleMainImgLoad = (e) => {
-    // setMainImg(e.target);
-    resourceLoaded();
-  };
-
-  const handleFillImgLoad = (e) => {
-    // setFillAreaImg(e.target);
+  const handleImageLoad = (e) => {
+    const img = e.target;
+    setItemImages((prevState) => [...prevState, img]);
     resourceLoaded();
   };
 
   useEffect(() => {
     if (curLoadedResNum === totalResToLoad) {
       setLoading(false);
-      /*
-      fillCtxRef.current.drawImage(fillAreaImg, 0, 0, 870, 500);
-      onScreenCtxRef.current.drawImage(fillCvsRef.current, 0, 0, 870, 500);
-      onScreenCtxRef.current.drawImage(mainImg, 0, 0, 870, 500);
-      */
+      drawItemsBar();
+      drawCanvas();
     }
-  }, [mainImg]);
+  }, [itemImages]);
 
   useEffect(() => {
-    /*
-    // main image
     onScreenCtxRef.current = onScreenCvsRef.current.getContext('2d');
-    const img1 = new Image();
-    img1.src = images.find((i) => i.type === 'mainImage').src;
-    img1.addEventListener('load', handleMainImgLoad);
 
-    // fill availability area map on a separate canvas
-    fillCvsRef.current = document.createElement('canvas');
-    fillCvsRef.current.width = 870;
-    fillCvsRef.current.height = 500;
-    fillCtxRef.current = fillCvsRef.current.getContext('2d');
-    const img2 = new Image();
-    img2.src = images.find((i) => i.type === 'fillArea').src;
-    img2.addEventListener('load', handleFillImgLoad);
+    // a separate canvas for grid
+    gridCvsRef.current = document.createElement('canvas');
+    gridCvsRef.current.width = 870;
+    gridCvsRef.current.height = 500;
+    gridCtxRef.current = gridCvsRef.current.getContext('2d');
+    drawGrid();
 
-    // a separate canvas for pencil draw
-    pencilDrawCvs.current = document.createElement('canvas');
-    pencilDrawCvs.current.width = 870;
-    pencilDrawCvs.current.height = 500;
-    pencilDrawCtx.current = pencilDrawCvs.current.getContext('2d');
-    // pencilDrawCtx.current.lineWidth = brushSize;
-    pencilDrawCtx.current.lineWidth = 4;
-    pencilDrawCtx.current.lineCap = 'round';
-    pencilDrawCtx.current.lineJoin = 'round';
+    // a separate canvas for items bar
+    itemsCvsRef.current = document.createElement('canvas');
+    itemsCvsRef.current.width = 870;
+    itemsCvsRef.current.height = 500;
+    itemsCtxRef.current = itemsCvsRef.current.getContext('2d');
+
+    setItemImages([]);
+    const tempImages = [];
+    images
+      .filter((image) => image.type === 'item')
+      .forEach((image) => {
+        let img = new Image();
+        img.src = image.src;
+        tempImages.push(img);
+        img.addEventListener('load', handleImageLoad);
+      });
 
     return () => {
       // clearing things up on component unmount
-      img1.removeEventListener('load', handleMainImgLoad);
-      img2.removeEventListener('load', handleFillImgLoad);
+      tempImages.forEach((image) => {
+        image.removeEventListener('load', handleImageLoad);
+      });
       curLoadedResNum = 0;
     };
-    */
-    console.log('ba hayray');
   }, []);
 
   return (

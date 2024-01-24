@@ -6,7 +6,32 @@ import ToolsPanel from '../components/ToolsPanel';
 
 const description = '';
 const tools = ['grab', 'tree'];
-const images = [];
+const images = [
+  {
+    type: 'item',
+    src: '/images/exercises/grade1/rectangle-red.png',
+  },
+  {
+    type: 'item',
+    src: '/images/exercises/grade1/circle-red.png',
+  },
+  {
+    type: 'item',
+    src: '/images/exercises/grade1/triangle-red.png',
+  },
+  {
+    type: 'item',
+    src: '/images/exercises/grade1/rectangle-yellow.png',
+  },
+  {
+    type: 'item',
+    src: '/images/exercises/grade1/circle-yellow.png',
+  },
+  {
+    type: 'item',
+    src: '/images/exercises/grade1/triangle-yellow.png',
+  },
+];
 
 const SampleTreeExercisePanel = () => {
   return (
