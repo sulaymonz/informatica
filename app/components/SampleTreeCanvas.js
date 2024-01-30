@@ -5,14 +5,28 @@ import { useSelector } from 'react-redux';
 import resolveConfig from 'tailwindcss/resolveConfig';
 import tailwindConfig from '../../tailwind.config';
 import LoadingSpinner from './LoadingSpinner';
-import { Battery50 } from '@mui/icons-material';
 
 const fullConfig = resolveConfig(tailwindConfig);
 let curLoadedResNum = 0;
+
+const initialGrid = [
+  ['', '', '', '', '', ''],
+  ['', '', '', '', '', ''],
+  ['', '', '', '', '', ''],
+  ['', '', '', '', '', ''],
+];
 const itemSize = 50;
 const itemPadding = 5;
 const itemBarX = 800;
 const itemBarY = 25;
+const gridX = 80;
+const gridY = 80;
+const spotRadius = 40;
+const spotPadding = 17;
+const w = initialGrid[0].length * 2 * (spotRadius + spotPadding);
+const h = initialGrid.length * 2 * (spotRadius + spotPadding);
+const dx = gridX - spotRadius - spotPadding;
+const dy = gridY - spotRadius - spotPadding;
 
 const Canvas = ({ images }) => {
   const totalResToLoad = images.length;
@@ -26,6 +40,14 @@ const Canvas = ({ images }) => {
   const grabCtxRef = useRef();
   const [loading, setLoading] = useState(true);
   const [itemImages, setItemImages] = useState([]);
+  const [grid, setGrid] = useState(
+    initialGrid.map((row) =>
+      row.map(() => ({
+        empty: true,
+        image: '',
+      })),
+    ),
+  );
   const [grabbing, setGrabbing] = useState(false);
   const [grabbingItem, setGrabbingItem] = useState(null);
   const { activeTool } = useSelector((state) => state.exercise);
@@ -46,6 +68,7 @@ const Canvas = ({ images }) => {
     const mouseY = e.clientY - rect.y;
     if (activeTool === 'grab') {
       if (
+        // on itembar area
         mouseX >= itemBarX - itemPadding &&
         mouseX <= itemBarX + itemSize + itemPadding &&
         mouseY >= itemBarY - itemPadding &&
@@ -54,12 +77,11 @@ const Canvas = ({ images }) => {
             itemPadding +
             itemImages.length * (itemSize + itemPadding * 2)
       ) {
-        setGrabbing(true);
-        setGrabbingItem(
-          itemImages[
-            Math.floor((mouseY - itemBarY) / (itemSize + itemPadding * 2))
-          ],
+        const itemIndex = Math.floor(
+          (mouseY - itemBarY) / (itemSize + itemPadding * 2),
         );
+        setGrabbing(true);
+        setGrabbingItem(itemImages[itemIndex]);
       }
     }
   };
@@ -71,36 +93,65 @@ const Canvas = ({ images }) => {
     }
   }, [grabbing]);
 
-  const onMouseUp = () => {
-    setGrabbing(false);
+  const onMouseUp = (e) => {
+    const rect = onScreenCvsRef.current.getBoundingClientRect();
+    const mouseX = e.clientX - rect.x;
+    const mouseY = e.clientY - rect.y;
+    const inGridMouseX = mouseX - dx;
+    const inGridMouseY = mouseY - dy;
+
     if (activeTool === 'grab') {
-      // do nothing
+      setGrabbing(false);
+      if (
+        // on grid area
+        mouseX >= dx &&
+        mouseX <= dx + w &&
+        mouseY >= dy &&
+        mouseY <= dy + h
+      ) {
+        const columnIndex = Math.floor(
+          inGridMouseX / (2 * (spotRadius + spotPadding)),
+        );
+        const rowIndex = Math.floor(
+          inGridMouseY / (2 * (spotRadius + spotPadding)),
+        );
+        setGrid(
+          grid.map((row, i) =>
+            row.map((spot, j) =>
+              i === rowIndex && j === columnIndex
+                ? {
+                    empty: false,
+                    image: grabbingItem,
+                  }
+                : spot,
+            ),
+          ),
+        );
+      }
     }
   };
 
   const drawGrid = () => {
-    const grid = [
-      ['', '', '', '', '', ''],
-      ['', '', '', '', '', ''],
-      ['', '', '', '', '', ''],
-      ['', '', '', '', '', ''],
-    ];
-
+    gridCtxRef.current.clearRect(0, 0, 870, 500);
     grid.forEach((row, i) => {
       row.forEach((spot, j) => {
-        const spotX = j * (2 * 50 + 25) + 70;
-        const spotY = i * (2 * 50 + 25) + 63;
-        gridCtxRef.current.globalAlpha = 0.03;
+        const spotX = j * 2 * (spotRadius + spotPadding) + gridX;
+        const spotY = i * 2 * (spotRadius + spotPadding) + gridY;
+        gridCtxRef.current.globalAlpha = spot.empty ? 0.03 : 0.2;
         gridCtxRef.current.beginPath();
-        gridCtxRef.current.arc(spotX, spotY, 50, 0, 2 * Math.PI);
+        gridCtxRef.current.arc(spotX, spotY, spotRadius, 0, 2 * Math.PI);
         gridCtxRef.current.fillStyle = 'red';
         gridCtxRef.current.fill();
+        if (!spot.empty) {
+          gridCtxRef.current.globalAlpha = 1;
+          gridCtxRef.current.drawImage(spot.image, spotX - 25, spotY - 25);
+        }
       });
     });
   };
 
   const drawItemsBar = () => {
-    itemsCtxRef.current.globalAlpha = 0.5;
+    itemsCtxRef.current.globalAlpha = 0.2;
     itemsCtxRef.current.fillStyle = '#ffffff';
     itemsCtxRef.current.fillRect(
       itemBarX - itemPadding,
@@ -157,6 +208,14 @@ const Canvas = ({ images }) => {
       redrawCanvas();
     }
   }, [itemImages]);
+
+  useEffect(() => {
+    if (gridCtxRef.current) {
+      console.log('grid updated, redrawing');
+      drawGrid();
+      redrawCanvas();
+    }
+  }, grid);
 
   useEffect(() => {
     onScreenCtxRef.current = onScreenCvsRef.current.getContext('2d');
