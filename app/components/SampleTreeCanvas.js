@@ -211,7 +211,6 @@ const Canvas = ({ images }) => {
 
   useEffect(() => {
     if (gridCtxRef.current) {
-      console.log('grid updated, redrawing');
       drawGrid();
       redrawCanvas();
     }
