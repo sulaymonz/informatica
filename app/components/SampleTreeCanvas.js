@@ -38,6 +38,8 @@ const Canvas = ({ images }) => {
   const itemsCtxRef = useRef();
   const grabCvsRef = useRef();
   const grabCtxRef = useRef();
+  const arrowsCvsRef = useRef();
+  const arrowsCtxRef = useRef();
   const [loading, setLoading] = useState(true);
   const [itemImages, setItemImages] = useState([]);
   const [grid, setGrid] = useState(
@@ -178,14 +180,45 @@ const Canvas = ({ images }) => {
     grabCtxRef.current.clearRect(0, 0, 870, 500);
   };
 
+  // arrow = shaft + tip
+  //
+  // t argument indicates in % how big should be shaft part in drawn arrow
+  // t should be in range from 0 to 1
+  // t can be interpreted as: t = shaftLength / arrowLength
+  //
+  const drawArrow = (x1, y1, x2, y2, t = 0.9) => {
+    const arrow = {
+      dx: x2 - x1,
+      dy: y2 - y1,
+    };
+    const middle = {
+      x: arrow.dx * t + x1,
+      y: arrow.dy * t + y1,
+    };
+    const tip = {
+      dx: x2 - middle.x,
+      dy: y2 - middle.y,
+    };
+    arrowsCtxRef.current.beginPath();
+    arrowsCtxRef.current.moveTo(x1, y1);
+    arrowsCtxRef.current.lineTo(middle.x, middle.y);
+    arrowsCtxRef.current.moveTo(
+      middle.x + 0.5 * tip.dy,
+      middle.y - 0.5 * tip.dx,
+    );
+    arrowsCtxRef.current.lineTo(
+      middle.x - 0.5 * tip.dy,
+      middle.y + 0.5 * tip.dx,
+    );
+    arrowsCtxRef.current.lineTo(x2, y2);
+    arrowsCtxRef.current.closePath();
+    arrowsCtxRef.current.stroke();
+    arrowsCtxRef.current.fill();
+  };
+
   const redrawCanvas = () => {
-    /*
     onScreenCtxRef.current.clearRect(0, 0, 870, 500);
-    onScreenCtxRef.current.drawImage(fillCvsRef.current, 0, 0, 870, 500);
-    onScreenCtxRef.current.drawImage(mainImg, 0, 0, 870, 500);
-    onScreenCtxRef.current.drawImage(pencilDrawCvs.current, 0, 0, 870, 500);
-    */
-    onScreenCtxRef.current.clearRect(0, 0, 870, 500);
+    onScreenCtxRef.current.drawImage(arrowsCvsRef.current, 0, 0, 870, 500);
     onScreenCtxRef.current.drawImage(gridCvsRef.current, 0, 0, 870, 500);
     onScreenCtxRef.current.drawImage(itemsCvsRef.current, 0, 0, 870, 500);
     onScreenCtxRef.current.drawImage(grabCvsRef.current, 0, 0, 870, 500);
@@ -237,6 +270,12 @@ const Canvas = ({ images }) => {
     grabCvsRef.current.width = 870;
     grabCvsRef.current.height = 500;
     grabCtxRef.current = grabCvsRef.current.getContext('2d');
+
+    // a separate canvas for arrows
+    arrowsCvsRef.current = document.createElement('canvas');
+    arrowsCvsRef.current.width = 870;
+    arrowsCvsRef.current.height = 500;
+    arrowsCtxRef.current = arrowsCvsRef.current.getContext('2d');
 
     setItemImages([]);
     const tempImages = [];
