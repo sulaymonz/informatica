@@ -277,6 +277,14 @@ const Canvas = ({ images }) => {
     arrowsCvsRef.current.height = 500;
     arrowsCtxRef.current = arrowsCvsRef.current.getContext('2d');
 
+    const angle = Math.atan2(308 - 194, 308 - 194);
+    console.log('angle', (angle * 180) / Math.PI);
+    const a = spotRadius * Math.cos(angle);
+    const b = spotRadius * Math.sin(angle);
+    console.log('a', a);
+    console.log('b', b);
+    drawArrow(194, 308, 308 - a, 194 + b, 0.95);
+
     setItemImages([]);
     const tempImages = [];
     images
