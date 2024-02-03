@@ -38,21 +38,78 @@ const Canvas = ({ images }) => {
   const itemsCtxRef = useRef();
   const grabCvsRef = useRef();
   const grabCtxRef = useRef();
+  const currArrowCvsRef = useRef();
+  const currArrowCtxRef = useRef();
   const arrowsCvsRef = useRef();
   const arrowsCtxRef = useRef();
+  const { activeTool } = useSelector((state) => state.exercise);
   const [loading, setLoading] = useState(true);
   const [itemImages, setItemImages] = useState([]);
   const [grid, setGrid] = useState(
-    initialGrid.map((row) =>
-      row.map(() => ({
-        empty: true,
+    initialGrid.map((row, i) =>
+      row.map((spot, j) => ({
         image: '',
+        x: j * 2 * (spotRadius + spotPadding) + gridX,
+        y: i * 2 * (spotRadius + spotPadding) + gridY,
+        destSpots: [],
       })),
     ),
   );
   const [grabbing, setGrabbing] = useState(false);
   const [grabbingItem, setGrabbingItem] = useState(null);
-  const { activeTool } = useSelector((state) => state.exercise);
+  const [drawingArrow, setDrawingArrow] = useState(false);
+  const [currArrowStart, setCurrArrowStart] = useState(null);
+
+  const onClick = (e) => {
+    const rect = onScreenCvsRef.current.getBoundingClientRect();
+    const mouseX = e.clientX - rect.x;
+    const mouseY = e.clientY - rect.y;
+    const inGridMouseX = mouseX - dx;
+    const inGridMouseY = mouseY - dy;
+    if (activeTool === 'tree') {
+      if (
+        // on grid area
+        mouseX >= dx &&
+        mouseX <= dx + w &&
+        mouseY >= dy &&
+        mouseY <= dy + h
+      ) {
+        const columnIndex = Math.floor(
+          inGridMouseX / (2 * (spotRadius + spotPadding)),
+        );
+        const rowIndex = Math.floor(
+          inGridMouseY / (2 * (spotRadius + spotPadding)),
+        );
+        const currSpot = grid[rowIndex][columnIndex];
+        if (!drawingArrow) {
+          if (currSpot.image) {
+            setDrawingArrow(true);
+            setCurrArrowStart({
+              x: currSpot.x,
+              y: currSpot.y,
+            });
+          }
+        } else {
+          // set destination spot for arrow
+          setGrid(
+            grid.map((row) =>
+              row.map((spot) =>
+                spot.x === currArrowStart.x && spot.y === currArrowStart.y
+                  ? {
+                      ...spot,
+                      destSpots: [
+                        ...spot.destSpots,
+                        { x: currSpot.x, y: currSpot.y },
+                      ],
+                    }
+                  : spot,
+              ),
+            ),
+          );
+        }
+      }
+    }
+  };
 
   const onMouseMove = (e) => {
     const rect = onScreenCvsRef.current.getBoundingClientRect();
@@ -61,6 +118,18 @@ const Canvas = ({ images }) => {
     if (activeTool === 'grab' && grabbing) {
       drawGrabbing(mouseX, mouseY);
       redrawCanvas();
+    } else if (activeTool === 'tree') {
+      if (drawingArrow) {
+        drawArrow(
+          currArrowCtxRef.current,
+          currArrowStart.x,
+          currArrowStart.y,
+          mouseX,
+          mouseY,
+          0.95,
+        );
+        redrawCanvas();
+      }
     }
   };
 
@@ -102,8 +171,7 @@ const Canvas = ({ images }) => {
     const inGridMouseX = mouseX - dx;
     const inGridMouseY = mouseY - dy;
 
-    if (activeTool === 'grab') {
-      setGrabbing(false);
+    if (activeTool === 'grab' && grabbing) {
       if (
         // on grid area
         mouseX >= dx &&
@@ -122,7 +190,7 @@ const Canvas = ({ images }) => {
             row.map((spot, j) =>
               i === rowIndex && j === columnIndex
                 ? {
-                    empty: false,
+                    ...spot,
                     image: grabbingItem,
                   }
                 : spot,
@@ -130,6 +198,8 @@ const Canvas = ({ images }) => {
           ),
         );
       }
+      setGrabbing(false);
+      setGrabbingItem(null);
     }
   };
 
@@ -139,12 +209,12 @@ const Canvas = ({ images }) => {
       row.forEach((spot, j) => {
         const spotX = j * 2 * (spotRadius + spotPadding) + gridX;
         const spotY = i * 2 * (spotRadius + spotPadding) + gridY;
-        gridCtxRef.current.globalAlpha = spot.empty ? 0.03 : 0.2;
+        gridCtxRef.current.globalAlpha = spot.image ? 0.2 : 0.03;
         gridCtxRef.current.beginPath();
         gridCtxRef.current.arc(spotX, spotY, spotRadius, 0, 2 * Math.PI);
         gridCtxRef.current.fillStyle = 'red';
         gridCtxRef.current.fill();
-        if (!spot.empty) {
+        if (spot.image) {
           gridCtxRef.current.globalAlpha = 1;
           gridCtxRef.current.drawImage(spot.image, spotX - 25, spotY - 25);
         }
@@ -186,7 +256,7 @@ const Canvas = ({ images }) => {
   // t should be in range from 0 to 1
   // t can be interpreted as: t = shaftLength / arrowLength
   //
-  const drawArrow = (x1, y1, x2, y2, t = 0.9) => {
+  const drawArrow = (ctx, x1, y1, x2, y2, t = 0.9, clearPrev = true) => {
     const arrow = {
       dx: x2 - x1,
       dy: y2 - y1,
@@ -199,25 +269,45 @@ const Canvas = ({ images }) => {
       dx: x2 - middle.x,
       dy: y2 - middle.y,
     };
-    arrowsCtxRef.current.beginPath();
-    arrowsCtxRef.current.moveTo(x1, y1);
-    arrowsCtxRef.current.lineTo(middle.x, middle.y);
-    arrowsCtxRef.current.moveTo(
-      middle.x + 0.5 * tip.dy,
-      middle.y - 0.5 * tip.dx,
-    );
-    arrowsCtxRef.current.lineTo(
-      middle.x - 0.5 * tip.dy,
-      middle.y + 0.5 * tip.dx,
-    );
-    arrowsCtxRef.current.lineTo(x2, y2);
-    arrowsCtxRef.current.closePath();
-    arrowsCtxRef.current.stroke();
-    arrowsCtxRef.current.fill();
+    if (clearPrev) {
+      ctx.clearRect(0, 0, 870, 500);
+    }
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(middle.x, middle.y);
+    ctx.moveTo(middle.x + 0.5 * tip.dy, middle.y - 0.5 * tip.dx);
+    ctx.lineTo(middle.x - 0.5 * tip.dy, middle.y + 0.5 * tip.dx);
+    ctx.lineTo(x2, y2);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.fill();
+  };
+
+  const spotToSpotArrow = (x1, y1, x2, y2) => {
+    // The arguments are the x and y coordinates to
+    // the centers of starting and destination spots.
+    // Arrow will be drawn from the center of the starting
+    // spot to the edge of the destination spot.
+    const angle = Math.atan2(y1 - y2, x2 - x1);
+    const a = spotRadius * Math.cos(angle);
+    const b = spotRadius * Math.sin(angle);
+    drawArrow(arrowsCtxRef.current, x1, y1, x2 - a, y2 + b, 0.95, false);
+  };
+
+  const drawArrowsSet = () => {
+    arrowsCtxRef.current.clearRect(0, 0, 870, 500);
+    grid.forEach((row) => {
+      row.forEach((spot) => {
+        spot.destSpots.forEach((dest) => {
+          spotToSpotArrow(spot.x, spot.y, dest.x, dest.y);
+        });
+      });
+    });
   };
 
   const redrawCanvas = () => {
     onScreenCtxRef.current.clearRect(0, 0, 870, 500);
+    onScreenCtxRef.current.drawImage(currArrowCvsRef.current, 0, 0, 870, 500);
     onScreenCtxRef.current.drawImage(arrowsCvsRef.current, 0, 0, 870, 500);
     onScreenCtxRef.current.drawImage(gridCvsRef.current, 0, 0, 870, 500);
     onScreenCtxRef.current.drawImage(itemsCvsRef.current, 0, 0, 870, 500);
@@ -247,6 +337,13 @@ const Canvas = ({ images }) => {
       drawGrid();
       redrawCanvas();
     }
+    if (drawingArrow && arrowsCtxRef.current) {
+      currArrowCtxRef.current.clearRect(0, 0, 870, 500);
+      drawArrowsSet();
+      redrawCanvas();
+      setDrawingArrow(false);
+      setCurrArrowStart(null);
+    }
   }, grid);
 
   useEffect(() => {
@@ -271,19 +368,17 @@ const Canvas = ({ images }) => {
     grabCvsRef.current.height = 500;
     grabCtxRef.current = grabCvsRef.current.getContext('2d');
 
-    // a separate canvas for arrows
+    // a separate canvas for the arrow currently being drawn
+    currArrowCvsRef.current = document.createElement('canvas');
+    currArrowCvsRef.current.width = 870;
+    currArrowCvsRef.current.height = 500;
+    currArrowCtxRef.current = currArrowCvsRef.current.getContext('2d');
+
+    // a separate canvas for the set of all arrows
     arrowsCvsRef.current = document.createElement('canvas');
     arrowsCvsRef.current.width = 870;
     arrowsCvsRef.current.height = 500;
     arrowsCtxRef.current = arrowsCvsRef.current.getContext('2d');
-
-    const angle = Math.atan2(308 - 194, 308 - 194);
-    console.log('angle', (angle * 180) / Math.PI);
-    const a = spotRadius * Math.cos(angle);
-    const b = spotRadius * Math.sin(angle);
-    console.log('a', a);
-    console.log('b', b);
-    drawArrow(194, 308, 308 - a, 194 + b, 0.95);
 
     setItemImages([]);
     const tempImages = [];
@@ -322,6 +417,7 @@ const Canvas = ({ images }) => {
         ref={onScreenCvsRef}
         width="870"
         height="500"
+        onClick={onClick}
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
         onMouseMove={onMouseMove}
