@@ -12,3 +12,7 @@ export function toolSelected(tool) {
 export function resetExercise() {
   return { type: types.RESET_EXERCISE };
 }
+
+export function updatePalette() {
+  return { type: types.UPDATE_PALETTE };
+}

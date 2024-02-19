@@ -94,9 +94,9 @@ export default function Grade1() {
           <li>
             <Link
               className="text-accent hover:text-primary"
-              href="/courses/grade-1/sample-tree-lesson"
+              href="/courses/grade-1/vizu"
             >
-              <strong>Урок:</strong> Тестовая задача "Дерево"
+              <strong>Test:</strong> "Vizu"
             </Link>
           </li>
         </ul>

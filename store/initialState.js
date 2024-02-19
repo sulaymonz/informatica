@@ -10,6 +10,8 @@ const initialState = {
       a: 255,
     },
     activeTool: 'fill',
+    palette: ['606c38', '283618', 'fefae0', 'dda15e', 'bc6c25'],
+    paletteIndex: 0,
   },
 };
 
